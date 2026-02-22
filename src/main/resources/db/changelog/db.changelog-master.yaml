@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: init_user_table
+      author: me
+      changes:
+        - sqlFile:
+            path: 20260215_1848_init_user_table.sql
+            relativeToChangelogFile: true
