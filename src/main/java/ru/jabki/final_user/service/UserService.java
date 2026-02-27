@@ -18,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private ExternalTodoService externalTodoService;
 
     @Transactional(rollbackFor = Exception.class)
     public UserResponse create(final User user) {
@@ -38,6 +39,7 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
+        validateUserDelete(id);
         userRepository.delete(id);
     }
 
@@ -67,6 +69,15 @@ public class UserService {
                     " 2) должен содержать цифры, латинские буквы в нижнем и верхнем регистрах, специальные символы;" +
                     " 3) не должен содержать пробелы"
             );
+        }
+    }
+
+    private void validateUserDelete(final Long userId) {
+        if (userId == null) {
+            throw new UserException("Id пользователя не задан");
+        }
+        if (externalTodoService.userByIdInvolved(userId)) {
+            throw new UserException(String.format("Пользователь с id '%s' задействован в задачах", userId));
         }
     }
 
