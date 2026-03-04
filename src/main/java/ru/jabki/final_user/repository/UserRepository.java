@@ -2,10 +2,12 @@ package ru.jabki.final_user.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.jabki.final_user.exception.BadRequestException;
+import ru.jabki.final_user.exception.UserByIdNotFoundException;
 import ru.jabki.final_user.model.User;
 import ru.jabki.final_user.model.UserResponse;
 
@@ -22,7 +24,7 @@ public class UserRepository {
             """;
 
     private static final String GET_BY_ID = """
-            SELECT *
+            SELECT id, username
             FROM final_user.user
             WHERE id = :id
             AND deleted_at IS NULL
@@ -41,18 +43,23 @@ public class UserRepository {
             AND deleted_at IS NULL
             """;
 
+    private static final String EXISTS_BY_ID = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM final_user.user
+                WHERE id = :id
+                AND deleted_at is null
+            )
+            """;
+
     private final UserMapper userMapper;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public UserResponse insert(final User user) {
         try {
             return jdbcTemplate.queryForObject(INSERT, userToSql(user), userMapper);
-        } catch (DataAccessException e) {
-            if (e.getMessage().contains("\"user_idx01\"")) {
+        } catch (DuplicateKeyException e) {
                 throw new BadRequestException(String.format("Пользователь '%s' уже существует", user.getUsername()));
-            }
-
-            throw e;
         }
     }
 
@@ -60,7 +67,7 @@ public class UserRepository {
         try {
             return jdbcTemplate.queryForObject(GET_BY_ID, new MapSqlParameterSource("id", id), userMapper);
         } catch (DataAccessException e) {
-            throw new BadRequestException(String.format("Пользователь с id %s не найден", id));
+            throw new UserByIdNotFoundException(id);
         }
     }
 
@@ -70,17 +77,13 @@ public class UserRepository {
 
     public void delete(final Long id) {
         if (jdbcTemplate.update(DELETE, new MapSqlParameterSource("id", id)) == 0) {
-            throw new BadRequestException(String.format("Пользователь с id %s не найден", id));
+            throw new UserByIdNotFoundException(id);
         }
     }
 
     public boolean existsById(final Long id) {
-        try {
-            jdbcTemplate.queryForObject(GET_BY_ID, new MapSqlParameterSource("id", id), userMapper);
-            return true;
-        } catch (DataAccessException e) {
-            return false;
-        }
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(EXISTS_BY_ID, new MapSqlParameterSource("id", id), Boolean.class));
     }
 
     public MapSqlParameterSource userToSql(final User user) {

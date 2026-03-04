@@ -18,7 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private ExternalTodoService externalTodoService;
+    private final ExternalTodoService externalTodoService;
 
     @Transactional(rollbackFor = Exception.class)
     public UserResponse create(final User user) {
