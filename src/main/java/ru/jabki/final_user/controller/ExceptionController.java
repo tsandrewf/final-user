@@ -3,7 +3,6 @@ package ru.jabki.final_user.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.jabki.final_user.exception.UserByIdNotFoundException;
 import ru.jabki.final_user.model.ApiError;

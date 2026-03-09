@@ -52,4 +52,10 @@ public class UserController {
     public boolean existsById(@PathVariable("id") Long id) {
         return userService.existsById(id);
     }
+
+    @GetMapping("/credentials/{username}")
+    @Operation(summary = "Получить реквизиты пользователя для входа")
+    public User getCredentials(@PathVariable("username") String username) {
+        return userService.getCredentials(username);
+    }
 }

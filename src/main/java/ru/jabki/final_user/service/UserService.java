@@ -44,6 +44,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User getCredentials(final String username) {
+        return userRepository.getCredentials(username);
+    }
+
+    @Transactional(readOnly = true)
     public boolean existsById(final long id) {
         return userRepository.existsById(id);
     }
