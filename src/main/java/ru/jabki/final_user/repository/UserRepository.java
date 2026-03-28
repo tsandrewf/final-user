@@ -8,7 +8,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.jabki.final_user.exception.BadRequestException;
 import ru.jabki.final_user.exception.UserByIdNotFoundException;
+import ru.jabki.final_user.exception.UserByNameNotFoundException;
 import ru.jabki.final_user.model.User;
+import ru.jabki.final_user.model.UserCredentials;
 import ru.jabki.final_user.model.UserResponse;
 
 import java.util.List;
@@ -18,8 +20,8 @@ import java.util.List;
 public class UserRepository {
 
     private static final String INSERT = """
-            INSERT INTO final_user.user (username, password, created_at)
-            VALUES (:username, :password, now())
+            INSERT INTO final_user.user (username, password, role, created_at)
+            VALUES (:username, :password, :role, now())
             RETURNING *;
             """;
 
@@ -52,7 +54,15 @@ public class UserRepository {
             )
             """;
 
+    private static final String GET_CREDENTIALS = """
+            SELECT username, role
+            FROM final_user.user
+            WHERE username = :username
+            AND deleted_at IS NULL
+            """;
+
     private final UserMapper userMapper;
+    private final UserCredentialsMapper userCredentialsMapper;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public UserResponse insert(final User user) {
@@ -86,11 +96,20 @@ public class UserRepository {
                 jdbcTemplate.queryForObject(EXISTS_BY_ID, new MapSqlParameterSource("id", id), Boolean.class));
     }
 
+    public UserCredentials getCredentials(final String username) {
+        try {
+            return jdbcTemplate.queryForObject(GET_CREDENTIALS, new MapSqlParameterSource("username", username), userCredentialsMapper);
+        } catch (DataAccessException e) {
+            throw new UserByNameNotFoundException(username);
+        }
+    }
+
     public MapSqlParameterSource userToSql(final User user) {
         final MapSqlParameterSource params = new MapSqlParameterSource();
 
         params.addValue("username", user.getUsername());
         params.addValue("password", user.getPassword());
+        params.addValue("role", user.getRole().getId());
 
         return params;
     }

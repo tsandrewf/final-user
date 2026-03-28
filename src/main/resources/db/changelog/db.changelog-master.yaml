@@ -6,3 +6,10 @@ databaseChangeLog:
         - sqlFile:
             path: 20260215_1848_init_user_table.sql
             relativeToChangelogFile: true
+  - changeSet:
+      id: add_column_role
+      author: me
+      changes:
+        - sqlFile:
+            path: 20260309_1127_add_column_role.sql
+            relativeToChangelogFile: true

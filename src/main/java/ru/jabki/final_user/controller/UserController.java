@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.jabki.final_user.model.User;
+import ru.jabki.final_user.model.UserCredentials;
 import ru.jabki.final_user.model.UserResponse;
 import ru.jabki.final_user.service.UserService;
 
@@ -51,5 +52,11 @@ public class UserController {
     @Operation(summary = "Проверка, существует ли пользователь с id")
     public boolean existsById(@PathVariable("id") Long id) {
         return userService.existsById(id);
+    }
+
+    @GetMapping("/credentials/{username}")
+    @Operation(summary = "Получить реквизиты пользователя для входа")
+    public UserCredentials getCredentials(@PathVariable("username") String username) {
+        return userService.getCredentials(username);
     }
 }

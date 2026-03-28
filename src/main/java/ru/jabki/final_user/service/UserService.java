@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.jabki.final_user.exception.UserException;
 import ru.jabki.final_user.model.User;
+import ru.jabki.final_user.model.UserCredentials;
 import ru.jabki.final_user.model.UserResponse;
 import ru.jabki.final_user.repository.UserRepository;
 
@@ -41,6 +42,11 @@ public class UserService {
     public void delete(Long id) {
         validateUserDelete(id);
         userRepository.delete(id);
+    }
+
+    @Transactional(readOnly = true)
+    public UserCredentials getCredentials(final String username) {
+        return userRepository.getCredentials(username);
     }
 
     @Transactional(readOnly = true)
