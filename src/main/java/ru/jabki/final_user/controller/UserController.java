@@ -59,4 +59,10 @@ public class UserController {
     public UserCredentials getCredentials(@PathVariable("username") String username) {
         return userService.getCredentials(username);
     }
+
+    @GetMapping("/role/{id}")
+    @Operation(summary = "Получить роль пользователя")
+    public String getRoleById(@PathVariable("id") Long id) {
+        return userService.getRoleById(id);
+    }
 }

@@ -9,11 +9,13 @@ import org.springframework.stereotype.Repository;
 import ru.jabki.final_user.exception.BadRequestException;
 import ru.jabki.final_user.exception.UserByIdNotFoundException;
 import ru.jabki.final_user.exception.UserByNameNotFoundException;
+import ru.jabki.final_user.model.Role;
 import ru.jabki.final_user.model.User;
 import ru.jabki.final_user.model.UserCredentials;
 import ru.jabki.final_user.model.UserResponse;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @AllArgsConstructor
@@ -61,6 +63,13 @@ public class UserRepository {
             AND deleted_at IS NULL
             """;
 
+    private static final String GET_ROLE_BY_ID = """
+            SELECT role
+            FROM final_user.user
+            WHERE id = :id
+            AND deleted_at IS NULL
+            """;
+
     private final UserMapper userMapper;
     private final UserCredentialsMapper userCredentialsMapper;
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -101,6 +110,14 @@ public class UserRepository {
             return jdbcTemplate.queryForObject(GET_CREDENTIALS, new MapSqlParameterSource("username", username), userCredentialsMapper);
         } catch (DataAccessException e) {
             throw new UserByNameNotFoundException(username);
+        }
+    }
+
+    public String getRoleById(final Long id) {
+        try {
+            return Role.getById(Objects.requireNonNull(jdbcTemplate.queryForObject(GET_ROLE_BY_ID, new MapSqlParameterSource("id", id), Long.class)).intValue()).toString();
+        } catch (DataAccessException e) {
+            throw new UserByIdNotFoundException(id);
         }
     }
 
