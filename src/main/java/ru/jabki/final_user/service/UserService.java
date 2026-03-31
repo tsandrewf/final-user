@@ -54,6 +54,11 @@ public class UserService {
         return userRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
+    public String getRoleById(final long id) {
+        return userRepository.getRoleById(id);
+    }
+
     private void validate(final User user) {
         if (user == null) {
             throw new UserException("Пользователь не задан");
